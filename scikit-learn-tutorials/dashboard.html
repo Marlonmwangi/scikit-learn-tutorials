@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Build Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #10132B;
+    --bg-grid: #171b3d;
+    --surface: #191D3D;
+    --surface-hover: #21275091;
+    --surface-alt: #22284d;
+    --text: #EDEAE0;
+    --text-dim: #9098BE;
+    --text-faint: #5c6394;
+    --accent-amber: #E8A33D;
+    --accent-amber-dim: #E8A33D33;
+    --accent-teal: #4FC8B8;
+    --accent-teal-dim: #4FC8B833;
+    --border: rgba(232,163,61,0.14);
+    --border-soft: rgba(237,234,224,0.08);
+    --danger: #E2685A;
+    --radius: 10px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(79,200,184,0.06), transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(232,163,61,0.07), transparent 40%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  a { color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-amber);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 28px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 28px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-teal);
+    margin: 0 0 10px;
+  }
+
+  .eyebrow::before { content: "// "; color: var(--text-faint); }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(32px, 4.5vw, 48px);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .stats {
+    display: flex;
+    gap: 28px;
+    font-family: var(--font-mono);
+  }
+
+  .stat { text-align: right; }
+  .stat-num {
+    display: block;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--accent-amber);
+    font-family: var(--font-display);
+  }
+  .stat-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
+  /* ---------- Console (signature element) ---------- */
+  .console {
+    background: linear-gradient(180deg, var(--surface), var(--surface-alt));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 40px;
+    box-shadow: 0 20px 50px -25px rgba(0,0,0,0.6);
+  }
+
+  .console-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-faint); opacity: 0.5;}
+
+  .console-form {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .prompt-glyph {
+    font-family: var(--font-mono);
+    color: var(--accent-amber);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  #url-input {
+    flex: 1;
+    min-width: 200px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    padding: 8px 0;
+  }
+  #url-input::placeholder { color: var(--text-faint); }
+  #url-input:focus { outline: none; }
+
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    background: var(--accent-teal);
+    animation: blink 1.1s steps(1) infinite;
+    margin-left: -6px;
+  }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; opacity: 0.6; } }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .log-btn {
+    background: var(--accent-amber);
+    color: #1b1305;
+    border: none;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.12s ease;
+    white-space: nowrap;
+  }
+  .log-btn:hover { background: #f2ae4c; transform: translateY(-1px); }
+  .log-btn:disabled { opacity: 0.5; cursor: progress; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .log-btn:hover { transform: none; } }
+
+  .console-hint {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+    padding: 0 16px 14px;
+  }
+
+  /* ---------- Filter row ---------- */
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: border-color 0.12s ease, color 0.12s ease;
+  }
+  .chip:hover { border-color: var(--accent-teal); color: var(--text); }
+  .chip.active {
+    background: var(--accent-teal-dim);
+    border-color: var(--accent-teal);
+    color: var(--accent-teal);
+  }
+
+  .search-input {
+    margin-left: auto;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    min-width: 180px;
+  }
+  .search-input::placeholder { color: var(--text-faint); }
+
+  /* ---------- Grid ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .card:hover { border-color: var(--border); transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+
+  .card-media {
+    aspect-ratio: 16 / 9;
+    background: var(--surface-alt);
+    position: relative;
+    overflow: hidden;
+  }
+  .card-media img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .card-media.fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 34px;
+    color: rgba(237,234,224,0.18);
+    background:
+      linear-gradient(135deg, var(--fallback-a, #22284d), var(--fallback-b, #191D3D));
+  }
+
+  .card-id {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    background: rgba(16,19,43,0.75);
+    backdrop-filter: blur(4px);
+    color: var(--accent-amber);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .card-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .card:hover .card-actions, .card:focus-within .card-actions { opacity: 1; }
+
+  .icon-btn {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: rgba(16,19,43,0.8);
+    border: 1px solid rgba(237,234,224,0.15);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--accent-teal); }
+  .icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+  .card-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    letter-spacing: 0.02em;
+  }
+  .card-meta .domain { color: var(--accent-teal); }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    margin: 0;
+    line-height: 1.3;
+  }
+  .card-title a { text-decoration: none; }
+  .card-title a:hover { color: var(--accent-amber); }
+
+  .card-desc {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--accent-amber-dim);
+    color: var(--accent-amber);
+  }
+
+  /* edit mode */
+  .card.editing .card-body input, .card.editing .card-body textarea {
+    width: 100%;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    resize: vertical;
+  }
+  .edit-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .edit-actions button {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-alt);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .edit-actions button.save { border-color: var(--accent-teal); color: var(--accent-teal); }
+  .edit-actions button.cancel:hover { color: var(--text); }
+
+  .placeholder-card { opacity: 0.55; }
+  .placeholder-card .card-desc { font-family: var(--font-mono); font-size: 12px; }
+
+  /* ---------- Empty state ---------- */
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 70px 20px;
+    border: 1px dashed var(--border-soft);
+    border-radius: var(--radius);
+  }
+  .empty-glyph {
+    font-family: var(--font-mono);
+    color: var(--accent-teal);
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .empty h3 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    margin: 0 0 8px;
+  }
+  .empty p { color: var(--text-dim); margin: 0; font-size: 14px; }
+
+  @media (max-width: 560px) {
+    .header { align-items: flex-start; }
+    .stats { gap: 18px; }
+    .console-form { flex-direction: column; align-items: stretch; }
+    .prompt-glyph { display: none; }
+    .log-btn { width: 100%; }
+    .search-input { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div>
+      <p class="eyebrow">personal build log</p>
+      <h1>Project Dashboard</h1>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-num" id="stat-total">0</span>
+        <span class="stat-label">entries</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="stat-domains">0</span>
+        <span class="stat-label">sources</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="stat-latest">—</span>
+        <span class="stat-label">last logged</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="console">
+    <div class="console-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span>build-log ~ log a new entry</span>
+    </div>
+    <form class="console-form" id="log-form">
+      <span class="prompt-glyph">&gt;</span>
+      <input id="url-input" type="url" required placeholder="paste a project link and press enter" autocomplete="off" />
+      <span class="cursor" aria-hidden="true"></span>
+      <button type="submit" class="log-btn" id="log-btn">log it</button>
+    </form>
+    <p class="console-hint">Pulls the title, description, and preview image from the link automatically. You can edit any field after.</p>
+  </div>
+
+  <div class="filter-row" id="filter-row" hidden>
+    <span class="chip active" data-tag="__all__">all</span>
+    <input class="search-input" id="search-input" type="text" placeholder="search entries…" />
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+</div>
+
+<script>
+(function(){
+  const grid = document.getElementById('grid');
+  const form = document.getElementById('log-form');
+  const urlInput = document.getElementById('url-input');
+  const logBtn = document.getElementById('log-btn');
+  const filterRow = document.getElementById('filter-row');
+  const searchInput = document.getElementById('search-input');
+
+  let entries = [];
+  let activeTag = '__all__';
+  let searchTerm = '';
+
+  const FALLBACK_PAIRS = [
+    ['#22284d','#191D3D'], ['#2d2450','#191b3a'], ['#1c3d3a','#152a28'],
+    ['#3d2c1c','#241a10'], ['#1c2f3d','#101c26']
+  ];
+
+  function hashColorPair(str){
+    let h = 0;
+    for (let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+    return FALLBACK_PAIRS[h % FALLBACK_PAIRS.length];
+  }
+
+  function domainOf(url){
+    try { return new URL(url).hostname.replace(/^www\./,''); }
+    catch { return url; }
+  }
+
+  function formatDate(iso){
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  async function loadEntries(){
+    try {
+      const res = await window.storage.get('projects', false);
+      entries = res && res.value ? JSON.parse(res.value) : [];
+    } catch (e) {
+      entries = [];
+    }
+    render();
+  }
+
+  async function saveEntries(){
+    try {
+      await window.storage.set('projects', JSON.stringify(entries), false);
+    } catch (e) {
+      console.error('Storage error:', e);
+    }
+  }
+
+  async function fetchMeta(url){
+    try {
+      const res = await fetch('https://api.microlink.io/?url=' + encodeURIComponent(url));
+      const json = await res.json();
+      if (json.status === 'success') {
+        return {
+          title: json.data.title || '',
+          description: json.data.description || '',
+          image: (json.data.image && json.data.image.url) || (json.data.screenshot && json.data.screenshot.url) || null
+        };
+      }
+    } catch (e) { /* offline or blocked — fall back silently */ }
+    return { title: '', description: '', image: null };
+  }
+
+  function allTags(){
+    const set = new Set();
+    entries.forEach(e => (e.tags||[]).forEach(t => set.add(t)));
+    return Array.from(set).sort();
+  }
+
+  function updateStats(){
+    document.getElementById('stat-total').textContent = entries.length;
+    const domains = new Set(entries.map(e => e.domain));
+    document.getElementById('stat-domains').textContent = domains.size;
+    const latest = entries[0];
+    document.getElementById('stat-latest').textContent = latest ? formatDate(latest.addedAt).split(' ').slice(0,2).join(' ') : '—';
+  }
+
+  function renderFilters(){
+    if (entries.length === 0) { filterRow.hidden = true; return; }
+    filterRow.hidden = false;
+    const tags = allTags();
+    filterRow.querySelectorAll('.chip').forEach(c => { if (c.dataset.tag !== '__all__') c.remove(); });
+    const allChip = filterRow.querySelector('.chip[data-tag="__all__"]');
+    allChip.className = 'chip' + (activeTag === '__all__' ? ' active' : '');
+    tags.forEach(tag => {
+      const chip = document.createElement('span');
+      chip.className = 'chip' + (activeTag === tag ? ' active' : '');
+      chip.dataset.tag = tag;
+      chip.textContent = tag;
+      chip.addEventListener('click', () => { activeTag = tag; render(); });
+      filterRow.insertBefore(chip, searchInput);
+    });
+  }
+
+  function visibleEntries(){
+    return entries.filter(e => {
+      const matchesTag = activeTag === '__all__' || (e.tags||[]).includes(activeTag);
+      const term = searchTerm.trim().toLowerCase();
+      const matchesSearch = !term ||
+        e.title.toLowerCase().includes(term) ||
+        e.domain.toLowerCase().includes(term) ||
+        (e.description||'').toLowerCase().includes(term);
+      return matchesTag && matchesSearch;
+    });
+  }
+
+  function cardMediaHTML(e){
+    if (e.image) {
+      return `<img src="${escapeAttr(e.image)}" alt="" loading="lazy" onerror="this.parentElement.classList.add('fallback');this.remove();" />`;
+    }
+    return '';
+  }
+
+  function escapeHTML(str){
+    return (str || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function escapeAttr(str){ return escapeHTML(str); }
+
+  function render(){
+    updateStats();
+    renderFilters();
+    const list = visibleEntries();
+    grid.innerHTML = '';
+
+    if (entries.length === 0){
+      grid.innerHTML = `
+        <div class="empty">
+          <p class="empty-glyph">// log is empty</p>
+          <h3>No entries yet</h3>
+          <p>Paste a project link above to start your build log.</p>
+        </div>`;
+      return;
+    }
+
+    if (list.length === 0){
+      grid.innerHTML = `
+        <div class="empty">
+          <p class="empty-glyph">// no matches</p>
+          <h3>Nothing found</h3>
+          <p>Try a different tag or search term.</p>
+        </div>`;
+      return;
+    }
+
+    list.forEach((e, idx) => {
+      const globalIndex = entries.indexOf(e);
+      const idLabel = 'LOG-' + String(entries.length - globalIndex).padStart(3,'0');
+      const [a,b] = hashColorPair(e.domain);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = e.id;
+      card.innerHTML = `
+        <div class="card-media${e.image ? '' : ' fallback'}" style="--fallback-a:${a};--fallback-b:${b}">
+          ${cardMediaHTML(e)}
+          ${!e.image ? escapeHTML((e.domain||'?').slice(0,1).toUpperCase()) : ''}
+          <span class="card-id">${idLabel}</span>
+          <div class="card-actions">
+            <button class="icon-btn edit-btn" title="Edit" aria-label="Edit entry">✎</button>
+            <button class="icon-btn danger del-btn" title="Delete" aria-label="Delete entry">✕</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="domain">${escapeHTML(e.domain)}</span>
+            <span>${formatDate(e.addedAt)}</span>
+          </div>
+          <h3 class="card-title"><a href="${escapeAttr(e.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(e.title || e.url)}</a></h3>
+          <p class="card-desc">${escapeHTML(e.description || 'No description yet — click edit to add one.')}</p>
+          ${(e.tags && e.tags.length) ? `<div class="card-tags">${e.tags.map(t => `<span class="tag">${escapeHTML(t)}</span>`).join('')}</div>` : ''}
+        </div>
+      `;
+      card.querySelector('.del-btn').addEventListener('click', () => deleteEntry(e.id));
+      card.querySelector('.edit-btn').addEventListener('click', () => enterEditMode(card, e));
+      grid.appendChild(card);
+    });
+  }
+
+  function enterEditMode(card, e){
+    card.classList.add('editing');
+    const body = card.querySelector('.card-body');
+    body.innerHTML = `
+      <input type="text" class="f-title" value="${escapeAttr(e.title)}" placeholder="Title" />
+      <textarea class="f-desc" rows="2" placeholder="Description">${escapeHTML(e.description)}</textarea>
+      <input type="text" class="f-image" value="${escapeAttr(e.image || '')}" placeholder="Image URL (optional)" />
+      <input type="text" class="f-tags" value="${escapeAttr((e.tags||[]).join(', '))}" placeholder="Tags, comma separated" />
+      <div class="edit-actions">
+        <button type="button" class="save">Save</button>
+        <button type="button" class="cancel">Cancel</button>
+      </div>
+    `;
+    body.querySelector('.save').addEventListener('click', async () => {
+      e.title = body.querySelector('.f-title').value.trim() || e.url;
+      e.description = body.querySelector('.f-desc').value.trim();
+      e.image = body.querySelector('.f-image').value.trim() || null;
+      e.tags = body.querySelector('.f-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      await saveEntries();
+      render();
+    });
+    body.querySelector('.cancel').addEventListener('click', () => render());
+  }
+
+  async function deleteEntry(id){
+    entries = entries.filter(e => e.id !== id);
+    await saveEntries();
+    render();
+  }
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const url = urlInput.value.trim();
+    if (!url) return;
+    logBtn.disabled = true;
+    logBtn.textContent = 'fetching…';
+
+    const meta = await fetchMeta(url);
+    const entry = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+      url,
+      title: meta.title || domainOf(url),
+      description: meta.description || '',
+      image: meta.image || null,
+      domain: domainOf(url),
+      tags: [],
+      addedAt: new Date().toISOString()
+    };
+    entries.unshift(entry);
+    await saveEntries();
+    render();
+
+    urlInput.value = '';
+    logBtn.disabled = false;
+    logBtn.textContent = 'log it';
+    urlInput.focus();
+  });
+
+  searchInput.addEventListener('input', (e) => { searchTerm = e.target.value; render(); });
+
+  loadEntries();
+})();
+</script>
+</body>
+</html>
